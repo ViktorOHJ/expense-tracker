@@ -10,18 +10,18 @@ import (
 	models "github.com/ViktorOHJ/expense-tracker/pkg"
 )
 
-func AddCategory(parentContext context.Context, c *models.Category) (int, error) {
+func AddCategory(parentContext context.Context, c *models.Category) (models.Category, error) {
 	if DB == nil {
-		return 0, errors.New("DB = nil")
+		return models.Category{}, errors.New("DB = nil")
 	}
-	query := `INSERT INTO categories (name, description) VALUES ($1, $2) RETURNING id`
+	query := `INSERT INTO categories (name, description) VALUES ($1, $2) RETURNING *`
 	ctx, cancel := context.WithTimeout(parentContext, 5*time.Second)
 	defer cancel()
-	var id int
-	err := DB.QueryRow(ctx, query, c.Name, c.Description).Scan(&id)
+	category := models.Category{}
+	err := DB.QueryRow(ctx, query, c.Name, c.Description).Scan(&category.ID, &category.Name, &category.Description)
 	if err != nil {
 		log.Printf("failed to insert transaction: %v", err)
-		return 0, fmt.Errorf("failed to insert transaction: %v", err)
+		return models.Category{}, fmt.Errorf("failed to insert transaction: %v", err)
 	}
-	return id, nil
+	return category, nil
 }

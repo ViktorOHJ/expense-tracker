@@ -1,9 +1,7 @@
 package api
 
 import (
-	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 
@@ -23,15 +21,19 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request) {
 		JsonError(w, http.StatusBadRequest, "invalid json format")
 		return
 	}
-	ctx := context.Background()
-	id, err := db.AddCategory(ctx, &category)
+	if category.Name == "" {
+		JsonError(w, http.StatusBadRequest, "category name cannot be empty")
+		return
+	}
+
+	ctx := r.Context()
+	category, err = db.AddCategory(ctx, &category)
 	if err != nil {
 		JsonError(w, http.StatusInternalServerError, "error adding category")
 		return
 	}
-	category.ID = id
 	resp := models.SuccessResponse{
-		Message: fmt.Sprintf("category with id: %d added successfuly", id),
+		Message: "category added successfuly",
 		Data:    category,
 	}
 	JsonResponse(w, http.StatusCreated, resp)
