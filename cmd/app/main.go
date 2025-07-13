@@ -26,7 +26,7 @@ func main() {
 	defer pool.Close()
 
 	api.InitAPI()
-	log.Println("обработчики")
+	log.Println("API initialized")
 
 	port := os.Getenv("PORT")
 	if port == "" {

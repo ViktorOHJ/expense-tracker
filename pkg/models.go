@@ -27,3 +27,11 @@ type Summary struct {
 	PeriodStart  time.Time          `json:"period_start,omitempty"`
 	PeriodEnd    time.Time          `json:"period_end,omitempty"`
 }
+
+type ErrorResponse struct {
+	Message string `json:"message"`
+}
+type SuccessResponse struct {
+	Message string      `json:"message"`
+	Data    interface{} `json:"data,omitempty"`
+}
