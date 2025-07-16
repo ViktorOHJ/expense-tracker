@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -11,9 +10,6 @@ import (
 )
 
 func AddCategory(parentContext context.Context, c *models.Category) (models.Category, error) {
-	if DB == nil {
-		return models.Category{}, errors.New("DB = nil")
-	}
 	query := `INSERT INTO categories (name, description) VALUES ($1, $2) RETURNING *`
 	ctx, cancel := context.WithTimeout(parentContext, 5*time.Second)
 	defer cancel()

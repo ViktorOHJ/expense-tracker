@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -11,10 +10,6 @@ import (
 )
 
 func AddTransaction(parentCtx context.Context, t *models.Transaction) (models.Transaction, error) {
-	if DB == nil {
-		log.Println("db = nil")
-		return models.Transaction{}, errors.New("DB = nil")
-	}
 	query := `INSERT INTO transactions (is_income, amount, category_id, note) VALUES ($1, $2, $3, $4)
 RETURNING *`
 
@@ -30,19 +25,16 @@ RETURNING *`
 	return transaction, nil
 }
 
-func CheckCategory(parentCtx context.Context, catID int) (exists bool, err error) {
+func CheckCategory(parentCtx context.Context, id int) (exists bool, err error) {
 	ctx, cancel := context.WithTimeout(parentCtx, 5*time.Second)
 	defer cancel()
 
 	query := `SELECT EXISTS (SELECT 1 FROM categories WHERE id=$1)`
 
-	err = DB.QueryRow(ctx, query, catID).Scan(&exists)
+	err = DB.QueryRow(ctx, query, id).Scan(&exists)
 	if err != nil {
 		log.Printf("database error during category check: %v", err)
 		return false, fmt.Errorf("database error during category check: %v", err)
-	}
-	if !exists {
-		return false, nil
 	}
 	return exists, nil
 }

@@ -20,12 +20,9 @@ type Transaction struct {
 }
 
 type Summary struct {
-	TotalIncome  float64            `json:"total_income"`
-	TotalExpense float64            `json:"total_expense"`
-	Balance      float64            `json:"balance"`
-	PerCategory  map[string]float64 `json:"per_category,omitempty"`
-	PeriodStart  time.Time          `json:"period_start,omitempty"`
-	PeriodEnd    time.Time          `json:"period_end,omitempty"`
+	TotalIncome  float64 `json:"total_income"`
+	TotalExpense float64 `json:"total_expense"`
+	Balance      float64 `json:"balance"`
 }
 
 type ErrorResponse struct {

@@ -2,12 +2,16 @@ package db
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-var DB *pgxpool.Pool
+var (
+	DB          *pgxpool.Pool
+	ErrNotFound = fmt.Errorf("transaction not found")
+)
 
 func InitDB(parentCtx context.Context, dbURL string) (*pgxpool.Pool, error) {
 	ctx, cancel := context.WithTimeout(parentCtx, 5*time.Second)
