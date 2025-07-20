@@ -7,9 +7,10 @@ import (
 	"time"
 
 	models "github.com/ViktorOHJ/expense-tracker/pkg"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func AddTransaction(parentCtx context.Context, t *models.Transaction) (models.Transaction, error) {
+func AddTransaction(db *pgxpool.Pool, parentCtx context.Context, t *models.Transaction) (models.Transaction, error) {
 	query := `INSERT INTO transactions (is_income, amount, category_id, note) VALUES ($1, $2, $3, $4)
 RETURNING *`
 
@@ -25,7 +26,7 @@ RETURNING *`
 	return transaction, nil
 }
 
-func CheckCategory(parentCtx context.Context, id int) (exists bool, err error) {
+func CheckCategory(db *pgxpool.Pool, parentCtx context.Context, id int) (exists bool, err error) {
 	ctx, cancel := context.WithTimeout(parentCtx, 5*time.Second)
 	defer cancel()
 

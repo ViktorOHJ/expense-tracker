@@ -25,7 +25,8 @@ func main() {
 	log.Println("Database connection established")
 	defer pool.Close()
 
-	api.InitAPI()
+	server := api.NewServer(pool)
+	server.InitRoutes()
 	log.Println("API initialized")
 
 	port := os.Getenv("PORT")

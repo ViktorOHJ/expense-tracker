@@ -1,20 +1,18 @@
 package api
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	models "github.com/ViktorOHJ/expense-tracker/pkg"
 	"github.com/ViktorOHJ/expense-tracker/pkg/db"
 )
 
-func DeleteHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) DeleteHandler(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimSpace(r.URL.Query().Get("id"))
 	if idStr == "" {
 		JsonError(w, http.StatusBadRequest, "id cannot be empty")
@@ -26,10 +24,7 @@ func DeleteHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
-	defer cancel()
-
-	err = db.DeleteTransaction(ctx, id)
+	err = db.DeleteTransaction(s.db, r.Context(), id)
 	if errors.Is(err, db.ErrNotFound) {
 		JsonError(w, http.StatusNotFound, "transaction not found")
 		return

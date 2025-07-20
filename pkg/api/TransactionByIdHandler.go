@@ -11,7 +11,7 @@ import (
 	"github.com/ViktorOHJ/expense-tracker/pkg/db"
 )
 
-func TransactionByIdHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) TransactionByIdHandler(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimSpace(r.URL.Query().Get("id"))
 	if idStr == "" {
 		JsonError(w, http.StatusBadRequest, "id cannot be empty")
@@ -22,8 +22,8 @@ func TransactionByIdHandler(w http.ResponseWriter, r *http.Request) {
 		JsonError(w, http.StatusBadRequest, "id must be a positive number")
 		return
 	}
-	ctx := r.Context()
-	transaction, err := db.GetTransactionByID(ctx, id)
+
+	transaction, err := db.GetTransactionByID(s.db, r.Context(), id)
 
 	if errors.Is(err, db.ErrNotFound) {
 		JsonError(w, http.StatusNotFound, fmt.Sprintf("transaction with id %d not found", id))

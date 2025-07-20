@@ -9,7 +9,7 @@ import (
 	"github.com/ViktorOHJ/expense-tracker/pkg/db"
 )
 
-func CategoriesHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) CategoriesHandler(w http.ResponseWriter, r *http.Request) {
 	category := models.Category{}
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -26,8 +26,7 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := r.Context()
-	category, err = db.AddCategory(ctx, &category)
+	category, err = db.AddCategory(s.db, r.Context(), &category)
 	if err != nil {
 		JsonError(w, http.StatusInternalServerError, "error adding category")
 		return

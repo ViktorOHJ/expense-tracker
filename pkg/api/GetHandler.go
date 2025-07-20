@@ -11,7 +11,7 @@ import (
 	"github.com/ViktorOHJ/expense-tracker/pkg/db"
 )
 
-func GetHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) GetHandler(w http.ResponseWriter, r *http.Request) {
 
 	q := r.URL.Query()
 	txType := strings.TrimSpace(q.Get("type"))
@@ -63,8 +63,22 @@ func GetHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		toTime = &t
 	}
-
-	transactions, err := db.GetTransactions(r.Context(), typeBool, categoryInt, fromTime, toTime)
+	limitStr := strings.TrimSpace(q.Get("limit"))
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit <= 0 {
+		log.Printf("invalid limit parameter: %s", limitStr)
+		JsonError(w, http.StatusBadRequest, "invalid limit parameter")
+		return
+	}
+	pageStr := strings.TrimSpace(q.Get("offset"))
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 0 {
+		log.Printf("invalid page parameter: %s", pageStr)
+		JsonError(w, http.StatusBadRequest, "invalid offset parameter")
+		return
+	}
+	offset := (page - 1) * limit
+	transactions, err := db.GetTransactions(s.db, r.Context(), typeBool, categoryInt, fromTime, toTime, limit, offset)
 	if err != nil {
 		JsonError(w, http.StatusInternalServerError, "error retrieving transactions")
 		return

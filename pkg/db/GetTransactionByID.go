@@ -4,15 +4,20 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	models "github.com/ViktorOHJ/expense-tracker/pkg"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func GetTransactionByID(ctx context.Context, id int) (models.Transaction, error) {
+func GetTransactionByID(db *pgxpool.Pool, parentCtx context.Context, id int) (models.Transaction, error) {
 	var transaction models.Transaction
 	query := `SELECT * FROM transactions WHERE id=$1`
-	row := DB.QueryRow(ctx, query, id)
+
+	ctx, cancel := context.WithTimeout(parentCtx, 5*time.Second)
+	defer cancel()
+	row := db.QueryRow(ctx, query, id)
 
 	err := row.Scan(&transaction.ID, &transaction.IsIncome, &transaction.Amount, &transaction.CategoryID, &transaction.Note, &transaction.CreatedAt)
 	if err != nil {

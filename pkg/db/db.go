@@ -19,37 +19,39 @@ func InitDB(parentCtx context.Context, dbURL string) (*pgxpool.Pool, error) {
 
 	schema := `CREATE TABLE IF NOT EXISTS categories (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
+    name VARCHAR(100) NOT NULL UNIQUE,
     description TEXT
 );
 CREATE TABLE IF NOT EXISTS transactions (
     id SERIAL PRIMARY KEY,
     is_income BOOLEAN NOT NULL,
-    amount NUMERIC(10,2) NOT NULL,
-    category_id INTEGER REFERENCES categories(id),
+    amount NUMERIC(10,2) NOT NULL CHECK (amount > 0),
+    category_id INTEGER REFERENCES categories(id) ON DELETE RESTRICT,
     note TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+CREATE INDEX IF NOT EXISTS idx_transactions_created_at ON transactions(created_at);
+CREATE INDEX IF NOT EXISTS idx_transactions_category_id ON transactions(category_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_is_income ON transactions(is_income);
 `
 
-	Pool, err := pgxpool.New(ctx, dbURL)
+	pool, err := pgxpool.New(ctx, dbURL)
 	if err != nil {
 		return nil, err
 	}
 
 	// Test the connection
-	err = Pool.Ping(ctx)
+	err = pool.Ping(ctx)
 	if err != nil {
-		Pool.Close()
+		pool.Close()
 		return nil, err
 	}
 
-	_, err = Pool.Exec(ctx, schema)
+	_, err = pool.Exec(ctx, schema)
 	if err != nil {
-		Pool.Close()
+		pool.Close()
 		return nil, err
 	}
 
-	DB = Pool
-	return Pool, nil
+	return pool, nil
 }

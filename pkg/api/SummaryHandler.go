@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -12,7 +11,7 @@ import (
 	"github.com/ViktorOHJ/expense-tracker/pkg/db"
 )
 
-func SummaryHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) SummaryHandler(w http.ResponseWriter, r *http.Request) {
 	fromStr := strings.TrimSpace(r.URL.Query().Get("from"))
 	toStr := strings.TrimSpace(r.URL.Query().Get("to"))
 
@@ -30,9 +29,8 @@ func SummaryHandler(w http.ResponseWriter, r *http.Request) {
 		JsonError(w, http.StatusBadRequest, fmt.Sprintf("invalid to date format: %v", err))
 		return
 	}
-	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
-	defer cancel()
-	summary, err := db.GetSummary(ctx, from, to)
+
+	summary, err := db.GetSummary(s.db, r.Context(), from, to)
 	if err != nil {
 		log.Printf("error retrieving summary: %v", err)
 		JsonError(w, http.StatusInternalServerError, "error retrieving summary")
