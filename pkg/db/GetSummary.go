@@ -6,10 +6,9 @@ import (
 	"time"
 
 	models "github.com/ViktorOHJ/expense-tracker/pkg"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func GetSummary(db *pgxpool.Pool, parentCtx context.Context, from, to time.Time) (models.Summary, error) {
+func (db *PostgresDB) GetSummary(parentCtx context.Context, from, to time.Time) (models.Summary, error) {
 	query := `
 		SELECT
 			SUM(CASE WHEN is_income THEN amount ELSE 0 END) AS total_income,
@@ -21,7 +20,7 @@ func GetSummary(db *pgxpool.Pool, parentCtx context.Context, from, to time.Time)
 	ctx, cancel := context.WithTimeout(parentCtx, 5*time.Second)
 	defer cancel()
 	var summary models.Summary
-	err := db.QueryRow(ctx, query, from, to).Scan(&summary.TotalIncome, &summary.TotalExpense, &summary.Balance)
+	err := db.pool.QueryRow(ctx, query, from, to).Scan(&summary.TotalIncome, &summary.TotalExpense, &summary.Balance)
 	if err != nil {
 		log.Printf("failed to retrieve summary: %v", err)
 		return models.Summary{}, err

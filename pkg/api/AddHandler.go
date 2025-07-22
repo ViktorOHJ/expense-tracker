@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	models "github.com/ViktorOHJ/expense-tracker/pkg"
-	"github.com/ViktorOHJ/expense-tracker/pkg/db"
 )
 
 func (s *Server) AddHandler(w http.ResponseWriter, r *http.Request) {
@@ -28,7 +27,7 @@ func (s *Server) AddHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ctx := r.Context()
-	exists, err := db.CheckCategory(s.db, ctx, transaction.CategoryID)
+	exists, err := s.db.CheckCategory(ctx, transaction.CategoryID)
 	if err != nil {
 		JsonError(w, http.StatusInternalServerError, "database error during category check")
 		return
@@ -38,7 +37,7 @@ func (s *Server) AddHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	transaction, err = db.AddTransaction(s.db, ctx, &transaction)
+	transaction, err = s.db.AddTransaction(ctx, &transaction)
 	if err != nil {
 		JsonError(w, http.StatusInternalServerError, "error adding transactions")
 		return

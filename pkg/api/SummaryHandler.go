@@ -8,7 +8,6 @@ import (
 	"time"
 
 	models "github.com/ViktorOHJ/expense-tracker/pkg"
-	"github.com/ViktorOHJ/expense-tracker/pkg/db"
 )
 
 func (s *Server) SummaryHandler(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +29,7 @@ func (s *Server) SummaryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	summary, err := db.GetSummary(s.db, r.Context(), from, to)
+	summary, err := s.db.GetSummary(r.Context(), from, to)
 	if err != nil {
 		log.Printf("error retrieving summary: %v", err)
 		JsonError(w, http.StatusInternalServerError, "error retrieving summary")

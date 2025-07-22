@@ -6,24 +6,26 @@ import (
 	"net/http"
 
 	models "github.com/ViktorOHJ/expense-tracker/pkg"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/ViktorOHJ/expense-tracker/pkg/db"
 )
 
 type Server struct {
-	db *pgxpool.Pool
+	db db.DB
 }
 
-func NewServer(db *pgxpool.Pool) *Server {
+func NewServer(db db.DB) *Server {
 	return &Server{
 		db: db,
 	}
 }
 
-func (s *Server) InitRoutes() {
-	http.HandleFunc("/transactions", s.TransactionHandler)
-	http.HandleFunc("/transaction/", s.DeleteGetHandler)
-	http.HandleFunc("/categories", s.CategoriesHandler)
-	http.HandleFunc("/summary", s.SummaryHandler)
+func (s *Server) InitRoutes() http.Handler {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/transactions", s.TransactionHandler)
+	mux.HandleFunc("/transaction/", s.DeleteGetHandler)
+	mux.HandleFunc("/categories", s.CategoriesHandler)
+	mux.HandleFunc("/summary", s.SummaryHandler)
+	return mux
 }
 
 func (s *Server) DeleteGetHandler(w http.ResponseWriter, r *http.Request) {

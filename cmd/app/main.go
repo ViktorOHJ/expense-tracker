@@ -25,8 +25,9 @@ func main() {
 	log.Println("Database connection established")
 	defer pool.Close()
 
-	server := api.NewServer(pool)
-	server.InitRoutes()
+	db := db.NewPostgresDB(pool)
+	server := api.NewServer(db)
+
 	log.Println("API initialized")
 
 	port := os.Getenv("PORT")
@@ -34,7 +35,7 @@ func main() {
 		port = "8080" // Default port
 	}
 	log.Printf("Starting server on port %s", port)
-	err = http.ListenAndServe(":"+port, nil)
+	err = http.ListenAndServe(":"+port, server.InitRoutes())
 	if err != nil {
 		log.Fatalf("Error starting server: %v", err)
 	}

@@ -23,7 +23,7 @@ func (s *Server) TransactionByIdHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	transaction, err := db.GetTransactionByID(s.db, r.Context(), id)
+	transaction, err := s.db.GetTransactionByID(r.Context(), id)
 
 	if errors.Is(err, db.ErrNotFound) {
 		JsonError(w, http.StatusNotFound, fmt.Sprintf("transaction with id %d not found", id))

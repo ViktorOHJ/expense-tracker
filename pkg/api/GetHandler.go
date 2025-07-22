@@ -8,7 +8,6 @@ import (
 	"time"
 
 	models "github.com/ViktorOHJ/expense-tracker/pkg"
-	"github.com/ViktorOHJ/expense-tracker/pkg/db"
 )
 
 func (s *Server) GetHandler(w http.ResponseWriter, r *http.Request) {
@@ -78,7 +77,7 @@ func (s *Server) GetHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	offset := (page - 1) * limit
-	transactions, err := db.GetTransactions(s.db, r.Context(), typeBool, categoryInt, fromTime, toTime, limit, offset)
+	transactions, err := s.db.GetTransactions(r.Context(), typeBool, categoryInt, fromTime, toTime, limit, offset)
 	if err != nil {
 		JsonError(w, http.StatusInternalServerError, "error retrieving transactions")
 		return

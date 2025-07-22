@@ -7,10 +7,9 @@ import (
 	"time"
 
 	models "github.com/ViktorOHJ/expense-tracker/pkg"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func AddTransaction(db *pgxpool.Pool, parentCtx context.Context, t *models.Transaction) (models.Transaction, error) {
+func (db *PostgresDB) AddTransaction(parentCtx context.Context, t *models.Transaction) (models.Transaction, error) {
 	query := `INSERT INTO transactions (is_income, amount, category_id, note) VALUES ($1, $2, $3, $4)
 RETURNING *`
 
@@ -18,7 +17,7 @@ RETURNING *`
 	defer cancel()
 
 	transaction := models.Transaction{}
-	err := DB.QueryRow(ctx, query, t.IsIncome, t.Amount, t.CategoryID, t.Note).Scan(&transaction.ID, &transaction.IsIncome, &transaction.Amount, &transaction.CategoryID, &transaction.Note, &transaction.CreatedAt)
+	err := db.pool.QueryRow(ctx, query, t.IsIncome, t.Amount, t.CategoryID, t.Note).Scan(&transaction.ID, &transaction.IsIncome, &transaction.Amount, &transaction.CategoryID, &transaction.Note, &transaction.CreatedAt)
 	if err != nil {
 		log.Printf("failed to insert transaction: %v", err)
 		return models.Transaction{}, fmt.Errorf("failed to insert transaction: %v", err)
@@ -26,13 +25,13 @@ RETURNING *`
 	return transaction, nil
 }
 
-func CheckCategory(db *pgxpool.Pool, parentCtx context.Context, id int) (exists bool, err error) {
+func (db *PostgresDB) CheckCategory(parentCtx context.Context, id int) (exists bool, err error) {
 	ctx, cancel := context.WithTimeout(parentCtx, 5*time.Second)
 	defer cancel()
 
 	query := `SELECT EXISTS (SELECT 1 FROM categories WHERE id=$1)`
 
-	err = DB.QueryRow(ctx, query, id).Scan(&exists)
+	err = db.pool.QueryRow(ctx, query, id).Scan(&exists)
 	if err != nil {
 		log.Printf("database error during category check: %v", err)
 		return false, fmt.Errorf("database error during category check: %v", err)

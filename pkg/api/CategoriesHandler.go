@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	models "github.com/ViktorOHJ/expense-tracker/pkg"
-	"github.com/ViktorOHJ/expense-tracker/pkg/db"
 )
 
 func (s *Server) CategoriesHandler(w http.ResponseWriter, r *http.Request) {
@@ -26,7 +25,7 @@ func (s *Server) CategoriesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	category, err = db.AddCategory(s.db, r.Context(), &category)
+	category, err = s.db.AddCategory(r.Context(), &category)
 	if err != nil {
 		JsonError(w, http.StatusInternalServerError, "error adding category")
 		return

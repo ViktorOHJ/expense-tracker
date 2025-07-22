@@ -7,10 +7,9 @@ import (
 	"time"
 
 	models "github.com/ViktorOHJ/expense-tracker/pkg"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func GetTransactions(db *pgxpool.Pool, parentCtx context.Context, txType *bool, category_id *int, from, to *time.Time, limit, offset int) ([]*models.Transaction, error) {
+func (db *PostgresDB) GetTransactions(parentCtx context.Context, txType *bool, category_id *int, from, to *time.Time, limit, offset int) ([]*models.Transaction, error) {
 
 	query := `SELECT * FROM transactions WHERE 1=1`
 	args := []interface{}{}
@@ -41,7 +40,7 @@ func GetTransactions(db *pgxpool.Pool, parentCtx context.Context, txType *bool, 
 	ctx, cancel := context.WithTimeout(parentCtx, 5*time.Second)
 	defer cancel()
 
-	rows, err := db.Query(ctx, query, args...)
+	rows, err := db.pool.Query(ctx, query, args...)
 	if err != nil {
 		log.Printf("failed to retrieve transactions: %v", err)
 		return []*models.Transaction{}, err

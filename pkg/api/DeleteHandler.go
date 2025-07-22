@@ -24,7 +24,7 @@ func (s *Server) DeleteHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = db.DeleteTransaction(s.db, r.Context(), id)
+	err = s.db.DeleteTransaction(r.Context(), id)
 	if errors.Is(err, db.ErrNotFound) {
 		JsonError(w, http.StatusNotFound, "transaction not found")
 		return
