@@ -29,6 +29,10 @@ func (s *Server) SummaryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if to.Before(from) {
+		JsonError(w, http.StatusBadRequest, "to date must be after from date")
+		return
+	}
 	summary, err := s.db.GetSummary(r.Context(), from, to)
 	if err != nil {
 		log.Printf("error retrieving summary: %v", err)

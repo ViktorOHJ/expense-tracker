@@ -76,6 +76,9 @@ func (s *Server) GetHandler(w http.ResponseWriter, r *http.Request) {
 		JsonError(w, http.StatusBadRequest, "invalid offset parameter")
 		return
 	}
+	if page == 0 {
+		page = 1 // Default to page 1 if not specified
+	}
 	offset := (page - 1) * limit
 	transactions, err := s.db.GetTransactions(r.Context(), typeBool, categoryInt, fromTime, toTime, limit, offset)
 	if err != nil {

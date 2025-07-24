@@ -35,6 +35,6 @@ func (s *Server) DeleteHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	JsonResponse(w, http.StatusOK, models.SuccessResponse{
-		Message: fmt.Sprintf("Transaction with id %d deleted successfully", id),
+		Message: fmt.Sprintf("transaction with id: %d successfully deleted", id),
 	})
 }

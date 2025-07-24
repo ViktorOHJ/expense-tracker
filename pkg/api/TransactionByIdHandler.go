@@ -18,7 +18,7 @@ func (s *Server) TransactionByIdHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	id, err := strconv.Atoi(idStr)
-	if err != nil || id < 0 {
+	if err != nil || id <= 0 {
 		JsonError(w, http.StatusBadRequest, "id must be a positive number")
 		return
 	}
