@@ -1,6 +1,7 @@
 package handler_test
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -8,6 +9,7 @@ import (
 
 	models "github.com/ViktorOHJ/expense-tracker/pkg"
 	"github.com/ViktorOHJ/expense-tracker/pkg/api"
+	"github.com/ViktorOHJ/expense-tracker/pkg/auth"
 	"github.com/ViktorOHJ/expense-tracker/pkg/db"
 	"github.com/ViktorOHJ/expense-tracker/pkg/mocks"
 	"github.com/stretchr/testify/assert"
@@ -16,12 +18,19 @@ import (
 
 func TestDeleteHandler_Success(t *testing.T) {
 	mockDB := new(mocks.DB)
-	s := api.NewServer(mockDB)
+	jwtService := auth.NewJWTService("test-secret")
+	passwordService := auth.NewPasswordService()
+	s := api.NewServer(mockDB, jwtService, passwordService)
 
-	// Mock the expected behavior
-	mockDB.On("DeleteTransaction", mock.Anything, 1).Return(nil)
+	// Mock с userID
+	mockDB.On("DeleteTransaction", mock.Anything, 1, 1).Return(nil)
 
 	req := httptest.NewRequest(http.MethodDelete, "/transaction/?id=1", nil)
+
+	claims := &auth.Claims{UserID: 1, Email: "test@example.com"}
+	ctx := context.WithValue(req.Context(), api.UserContextKey, claims)
+	req = req.WithContext(ctx)
+
 	rr := httptest.NewRecorder()
 
 	s.DeleteHandler(rr, req)
@@ -37,14 +46,35 @@ func TestDeleteHandler_Success(t *testing.T) {
 	mockDB.AssertExpectations(t)
 }
 
-func TestDeleteHandler_NotFound(t *testing.T) {
+func TestDeleteHandler_Unauthorized(t *testing.T) {
 	mockDB := new(mocks.DB)
-	s := api.NewServer(mockDB)
-
-	// Mock the expected behavior for not found
-	mockDB.On("DeleteTransaction", mock.Anything, 1).Return(db.ErrNotFound)
+	jwtService := auth.NewJWTService("test-secret")
+	passwordService := auth.NewPasswordService()
+	s := api.NewServer(mockDB, jwtService, passwordService)
 
 	req := httptest.NewRequest(http.MethodDelete, "/transaction/?id=1", nil)
+
+	rr := httptest.NewRecorder()
+
+	s.DeleteHandler(rr, req)
+
+	assert.Equal(t, http.StatusUnauthorized, rr.Code)
+
+	mockDB.AssertExpectations(t)
+}
+
+func TestDeleteHandler_NotFound(t *testing.T) {
+	mockDB := new(mocks.DB)
+	jwtService := auth.NewJWTService("test-secret")
+	passwordService := auth.NewPasswordService()
+	s := api.NewServer(mockDB, jwtService, passwordService)
+	mockDB.On("DeleteTransaction", mock.Anything, 1, 1).Return(db.ErrNotFound)
+
+	req := httptest.NewRequest(http.MethodDelete, "/transaction/?id=1", nil)
+	claims := &auth.Claims{UserID: 1, Email: "test@example.com"}
+	ctx := context.WithValue(req.Context(), api.UserContextKey, claims)
+	req = req.WithContext(ctx)
+
 	rr := httptest.NewRecorder()
 
 	s.DeleteHandler(rr, req)
@@ -55,14 +85,16 @@ func TestDeleteHandler_NotFound(t *testing.T) {
 	err := json.NewDecoder(rr.Body).Decode(&actualResp)
 	assert.NoError(t, err)
 
-	assert.Equal(t, "transaction not found", actualResp.Message)
+	assert.Equal(t, "transaction not found or access denied", actualResp.Message)
 
 	mockDB.AssertExpectations(t)
 }
 
 func TestDeleteHandler_BadRequest(t *testing.T) {
 	mockDB := new(mocks.DB)
-	s := api.NewServer(mockDB)
+	jwtService := auth.NewJWTService("test-secret")
+	passwordService := auth.NewPasswordService()
+	s := api.NewServer(mockDB, jwtService, passwordService)
 
 	tests := []struct {
 		name       string
@@ -77,6 +109,9 @@ func TestDeleteHandler_BadRequest(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			req := httptest.NewRequest(http.MethodDelete, tt.query, nil)
+			claims := &auth.Claims{UserID: 1, Email: "test@example.com"}
+			ctx := context.WithValue(req.Context(), api.UserContextKey, claims)
+			req = req.WithContext(ctx)
 			rr := httptest.NewRecorder()
 
 			s.DeleteHandler(rr, req)
@@ -94,12 +129,18 @@ func TestDeleteHandler_BadRequest(t *testing.T) {
 
 func TestDeleteHandler_DBError(t *testing.T) {
 	mockDB := new(mocks.DB)
-	s := api.NewServer(mockDB)
+	jwtService := auth.NewJWTService("test-secret")
+	passwordService := auth.NewPasswordService()
+	s := api.NewServer(mockDB, jwtService, passwordService)
 
-	// Mock the expected behavior for a database error
-	mockDB.On("DeleteTransaction", mock.Anything, 1).Return(assert.AnError)
+	mockDB.On("DeleteTransaction", mock.Anything, 1, 1).Return(assert.AnError)
 
 	req := httptest.NewRequest(http.MethodDelete, "/transaction/?id=1", nil)
+
+	claims := &auth.Claims{UserID: 1, Email: "test@example.com"}
+	ctx := context.WithValue(req.Context(), api.UserContextKey, claims)
+	req = req.WithContext(ctx)
+
 	rr := httptest.NewRecorder()
 
 	s.DeleteHandler(rr, req)

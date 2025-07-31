@@ -1,6 +1,7 @@
 package handler_test
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -9,6 +10,7 @@ import (
 
 	models "github.com/ViktorOHJ/expense-tracker/pkg"
 	"github.com/ViktorOHJ/expense-tracker/pkg/api"
+	"github.com/ViktorOHJ/expense-tracker/pkg/auth"
 
 	"github.com/ViktorOHJ/expense-tracker/pkg/mocks"
 	"github.com/stretchr/testify/assert"
@@ -17,7 +19,9 @@ import (
 
 func TestSummaryHandler_Success(t *testing.T) {
 	mockDB := new(mocks.DB)
-	s := api.NewServer(mockDB)
+	jwtService := auth.NewJWTService("test-secret")
+	passwordService := auth.NewPasswordService()
+	s := api.NewServer(mockDB, jwtService, passwordService)
 
 	from := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)
 	to := time.Date(2024, time.December, 31, 0, 0, 0, 0, time.UTC)
@@ -28,9 +32,12 @@ func TestSummaryHandler_Success(t *testing.T) {
 		Balance:      2000,
 	}
 
-	mockDB.On("GetSummary", mock.Anything, from, to).Return(expectedSummary, nil)
+	mockDB.On("GetSummary", mock.Anything, mock.Anything, from, to).Return(expectedSummary, nil)
 
 	req := httptest.NewRequest(http.MethodGet, "/summary?from=2024-01-01&to=2024-12-31", nil)
+	claims := &auth.Claims{UserID: 1, Email: "test@example.com"}
+	ctx := context.WithValue(req.Context(), api.UserContextKey, claims)
+	req = req.WithContext(ctx)
 	rr := httptest.NewRecorder()
 
 	s.SummaryHandler(rr, req)
@@ -57,9 +64,14 @@ func TestSummaryHandler_Success(t *testing.T) {
 
 func TestSummaryHandler_InvalidDateRange(t *testing.T) {
 	mockDB := new(mocks.DB)
-	s := api.NewServer(mockDB)
+	jwtService := auth.NewJWTService("test-secret")
+	passwordService := auth.NewPasswordService()
+	s := api.NewServer(mockDB, jwtService, passwordService)
 
 	req := httptest.NewRequest(http.MethodGet, "/summary?from=2024-12-31&to=2024-01-01", nil)
+	claims := &auth.Claims{UserID: 1, Email: "test@example.com"}
+	ctx := context.WithValue(req.Context(), api.UserContextKey, claims)
+	req = req.WithContext(ctx)
 	rr := httptest.NewRecorder()
 
 	s.SummaryHandler(rr, req)
@@ -77,14 +89,19 @@ func TestSummaryHandler_InvalidDateRange(t *testing.T) {
 
 func TestSummaryHandler_DBError(t *testing.T) {
 	mockDB := new(mocks.DB)
-	s := api.NewServer(mockDB)
+	jwtService := auth.NewJWTService("test-secret")
+	passwordService := auth.NewPasswordService()
+	s := api.NewServer(mockDB, jwtService, passwordService)
 
 	from := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)
 	to := time.Date(2024, 12, 31, 0, 0, 0, 0, time.UTC)
 
-	mockDB.On("GetSummary", mock.Anything, from, to).Return(models.Summary{}, assert.AnError)
+	mockDB.On("GetSummary", mock.Anything, mock.Anything, from, to).Return(models.Summary{}, assert.AnError)
 
 	req := httptest.NewRequest(http.MethodGet, "/summary?from=2024-01-01&to=2024-12-31", nil)
+	claims := &auth.Claims{UserID: 1, Email: "test@example.com"}
+	ctx := context.WithValue(req.Context(), api.UserContextKey, claims)
+	req = req.WithContext(ctx)
 	rr := httptest.NewRecorder()
 
 	s.SummaryHandler(rr, req)

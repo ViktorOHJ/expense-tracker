@@ -8,6 +8,7 @@ type Category struct {
 	ID          int    `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description,omitempty"`
+	UserID      int    `json:"user_id"`
 }
 
 type Transaction struct {
@@ -15,6 +16,7 @@ type Transaction struct {
 	IsIncome   bool      `json:"is_income"`
 	Amount     float64   `json:"amount"`
 	CategoryID int       `json:"category_id"`
+	UserID     int       `json:"user_id"`
 	Note       string    `json:"note,omitempty"`
 	CreatedAt  time.Time `json:"created_at"`
 }

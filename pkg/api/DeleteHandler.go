@@ -13,20 +13,28 @@ import (
 )
 
 func (s *Server) DeleteHandler(w http.ResponseWriter, r *http.Request) {
+
+	user := GetUserFromContext(r.Context())
+	if user == nil {
+		JsonError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
 	idStr := strings.TrimSpace(r.URL.Query().Get("id"))
 	if idStr == "" {
 		JsonError(w, http.StatusBadRequest, "id cannot be empty")
 		return
 	}
+
 	id, err := strconv.Atoi(idStr)
 	if err != nil || id <= 0 {
 		JsonError(w, http.StatusBadRequest, "id must be a positive number")
 		return
 	}
 
-	err = s.db.DeleteTransaction(r.Context(), id)
+	err = s.db.DeleteTransaction(r.Context(), user.UserID, id)
 	if errors.Is(err, db.ErrNotFound) {
-		JsonError(w, http.StatusNotFound, "transaction not found")
+		JsonError(w, http.StatusNotFound, "transaction not found or access denied")
 		return
 	}
 	if err != nil {
@@ -34,6 +42,7 @@ func (s *Server) DeleteHandler(w http.ResponseWriter, r *http.Request) {
 		JsonError(w, http.StatusInternalServerError, "failed to delete transaction")
 		return
 	}
+
 	JsonResponse(w, http.StatusOK, models.SuccessResponse{
 		Message: fmt.Sprintf("transaction with id: %d successfully deleted", id),
 	})

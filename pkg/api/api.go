@@ -6,25 +6,37 @@ import (
 	"net/http"
 
 	models "github.com/ViktorOHJ/expense-tracker/pkg"
+	"github.com/ViktorOHJ/expense-tracker/pkg/auth"
 	"github.com/ViktorOHJ/expense-tracker/pkg/db"
 )
 
 type Server struct {
-	db db.DB
+	db              db.DB
+	jwtService      *auth.JWTService
+	passwordService *auth.PasswordService
 }
 
-func NewServer(db db.DB) *Server {
+func NewServer(db db.DB, jwtService *auth.JWTService, passwordService *auth.PasswordService) *Server {
 	return &Server{
-		db: db,
+		db:              db,
+		jwtService:      jwtService,
+		passwordService: passwordService,
 	}
 }
 
 func (s *Server) InitRoutes() http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/transactions", s.TransactionHandler)
-	mux.HandleFunc("/transaction/", s.DeleteGetHandler)
-	mux.HandleFunc("/categories", s.CategoriesHandler)
-	mux.HandleFunc("/summary", s.SummaryHandler)
+
+	// Публичные маршруты
+	mux.HandleFunc("/auth/register", s.RegisterHandler)
+	mux.HandleFunc("/auth/login", s.LoginHandler)
+
+	// Защищенные маршруты
+	mux.HandleFunc("/transactions", s.AuthMiddleware(s.TransactionHandler))
+	mux.HandleFunc("/transaction/", s.AuthMiddleware(s.DeleteGetHandler))
+	mux.HandleFunc("/categories", s.AuthMiddleware(s.CategoriesHandler))
+	mux.HandleFunc("/summary", s.AuthMiddleware(s.SummaryHandler))
+
 	return mux
 }
 

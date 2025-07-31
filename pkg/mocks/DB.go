@@ -17,9 +17,17 @@ type DB struct {
 	mock.Mock
 }
 
-// AddCategory provides a mock function with given fields: _a0, _a1
-func (_m *DB) AddCategory(_a0 context.Context, _a1 *models.Category) (models.Category, error) {
-	ret := _m.Called(_a0, _a1)
+type DB_Expecter struct {
+	mock *mock.Mock
+}
+
+func (_m *DB) EXPECT() *DB_Expecter {
+	return &DB_Expecter{mock: &_m.Mock}
+}
+
+// AddCategory provides a mock function with given fields: _a0, _a1, _a2
+func (_m *DB) AddCategory(_a0 context.Context, _a1 int, _a2 *models.Category) (models.Category, error) {
+	ret := _m.Called(_a0, _a1, _a2)
 
 	if len(ret) == 0 {
 		panic("no return value specified for AddCategory")
@@ -27,17 +35,17 @@ func (_m *DB) AddCategory(_a0 context.Context, _a1 *models.Category) (models.Cat
 
 	var r0 models.Category
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *models.Category) (models.Category, error)); ok {
-		return rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(context.Context, int, *models.Category) (models.Category, error)); ok {
+		return rf(_a0, _a1, _a2)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *models.Category) models.Category); ok {
-		r0 = rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(context.Context, int, *models.Category) models.Category); ok {
+		r0 = rf(_a0, _a1, _a2)
 	} else {
 		r0 = ret.Get(0).(models.Category)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *models.Category) error); ok {
-		r1 = rf(_a0, _a1)
+	if rf, ok := ret.Get(1).(func(context.Context, int, *models.Category) error); ok {
+		r1 = rf(_a0, _a1, _a2)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -45,9 +53,39 @@ func (_m *DB) AddCategory(_a0 context.Context, _a1 *models.Category) (models.Cat
 	return r0, r1
 }
 
-// AddTransaction provides a mock function with given fields: _a0, _a1
-func (_m *DB) AddTransaction(_a0 context.Context, _a1 *models.Transaction) (models.Transaction, error) {
-	ret := _m.Called(_a0, _a1)
+// DB_AddCategory_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AddCategory'
+type DB_AddCategory_Call struct {
+	*mock.Call
+}
+
+// AddCategory is a helper method to define mock.On call
+//   - _a0 context.Context
+//   - _a1 int
+//   - _a2 *models.Category
+func (_e *DB_Expecter) AddCategory(_a0 interface{}, _a1 interface{}, _a2 interface{}) *DB_AddCategory_Call {
+	return &DB_AddCategory_Call{Call: _e.mock.On("AddCategory", _a0, _a1, _a2)}
+}
+
+func (_c *DB_AddCategory_Call) Run(run func(_a0 context.Context, _a1 int, _a2 *models.Category)) *DB_AddCategory_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(int), args[2].(*models.Category))
+	})
+	return _c
+}
+
+func (_c *DB_AddCategory_Call) Return(_a0 models.Category, _a1 error) *DB_AddCategory_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *DB_AddCategory_Call) RunAndReturn(run func(context.Context, int, *models.Category) (models.Category, error)) *DB_AddCategory_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// AddTransaction provides a mock function with given fields: _a0, _a1, _a2
+func (_m *DB) AddTransaction(_a0 context.Context, _a1 int, _a2 *models.Transaction) (models.Transaction, error) {
+	ret := _m.Called(_a0, _a1, _a2)
 
 	if len(ret) == 0 {
 		panic("no return value specified for AddTransaction")
@@ -55,17 +93,17 @@ func (_m *DB) AddTransaction(_a0 context.Context, _a1 *models.Transaction) (mode
 
 	var r0 models.Transaction
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *models.Transaction) (models.Transaction, error)); ok {
-		return rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(context.Context, int, *models.Transaction) (models.Transaction, error)); ok {
+		return rf(_a0, _a1, _a2)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *models.Transaction) models.Transaction); ok {
-		r0 = rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(context.Context, int, *models.Transaction) models.Transaction); ok {
+		r0 = rf(_a0, _a1, _a2)
 	} else {
 		r0 = ret.Get(0).(models.Transaction)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *models.Transaction) error); ok {
-		r1 = rf(_a0, _a1)
+	if rf, ok := ret.Get(1).(func(context.Context, int, *models.Transaction) error); ok {
+		r1 = rf(_a0, _a1, _a2)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -73,9 +111,39 @@ func (_m *DB) AddTransaction(_a0 context.Context, _a1 *models.Transaction) (mode
 	return r0, r1
 }
 
-// CheckCategory provides a mock function with given fields: _a0, _a1
-func (_m *DB) CheckCategory(_a0 context.Context, _a1 int) (bool, error) {
-	ret := _m.Called(_a0, _a1)
+// DB_AddTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AddTransaction'
+type DB_AddTransaction_Call struct {
+	*mock.Call
+}
+
+// AddTransaction is a helper method to define mock.On call
+//   - _a0 context.Context
+//   - _a1 int
+//   - _a2 *models.Transaction
+func (_e *DB_Expecter) AddTransaction(_a0 interface{}, _a1 interface{}, _a2 interface{}) *DB_AddTransaction_Call {
+	return &DB_AddTransaction_Call{Call: _e.mock.On("AddTransaction", _a0, _a1, _a2)}
+}
+
+func (_c *DB_AddTransaction_Call) Run(run func(_a0 context.Context, _a1 int, _a2 *models.Transaction)) *DB_AddTransaction_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(int), args[2].(*models.Transaction))
+	})
+	return _c
+}
+
+func (_c *DB_AddTransaction_Call) Return(_a0 models.Transaction, _a1 error) *DB_AddTransaction_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *DB_AddTransaction_Call) RunAndReturn(run func(context.Context, int, *models.Transaction) (models.Transaction, error)) *DB_AddTransaction_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// CheckCategory provides a mock function with given fields: _a0, _a1, _a2
+func (_m *DB) CheckCategory(_a0 context.Context, _a1 int, _a2 int) (bool, error) {
+	ret := _m.Called(_a0, _a1, _a2)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CheckCategory")
@@ -83,16 +151,74 @@ func (_m *DB) CheckCategory(_a0 context.Context, _a1 int) (bool, error) {
 
 	var r0 bool
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, int) (bool, error)); ok {
-		return rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(context.Context, int, int) (bool, error)); ok {
+		return rf(_a0, _a1, _a2)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, int) bool); ok {
-		r0 = rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(context.Context, int, int) bool); ok {
+		r0 = rf(_a0, _a1, _a2)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, int) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, int, int) error); ok {
+		r1 = rf(_a0, _a1, _a2)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// DB_CheckCategory_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CheckCategory'
+type DB_CheckCategory_Call struct {
+	*mock.Call
+}
+
+// CheckCategory is a helper method to define mock.On call
+//   - _a0 context.Context
+//   - _a1 int
+//   - _a2 int
+func (_e *DB_Expecter) CheckCategory(_a0 interface{}, _a1 interface{}, _a2 interface{}) *DB_CheckCategory_Call {
+	return &DB_CheckCategory_Call{Call: _e.mock.On("CheckCategory", _a0, _a1, _a2)}
+}
+
+func (_c *DB_CheckCategory_Call) Run(run func(_a0 context.Context, _a1 int, _a2 int)) *DB_CheckCategory_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(int), args[2].(int))
+	})
+	return _c
+}
+
+func (_c *DB_CheckCategory_Call) Return(_a0 bool, _a1 error) *DB_CheckCategory_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *DB_CheckCategory_Call) RunAndReturn(run func(context.Context, int, int) (bool, error)) *DB_CheckCategory_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// CreateUser provides a mock function with given fields: _a0, _a1
+func (_m *DB) CreateUser(_a0 context.Context, _a1 *models.User) (models.User, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateUser")
+	}
+
+	var r0 models.User
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *models.User) (models.User, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *models.User) models.User); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Get(0).(models.User)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *models.User) error); ok {
 		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)
@@ -101,17 +227,46 @@ func (_m *DB) CheckCategory(_a0 context.Context, _a1 int) (bool, error) {
 	return r0, r1
 }
 
-// DeleteTransaction provides a mock function with given fields: _a0, _a1
-func (_m *DB) DeleteTransaction(_a0 context.Context, _a1 int) error {
-	ret := _m.Called(_a0, _a1)
+// DB_CreateUser_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateUser'
+type DB_CreateUser_Call struct {
+	*mock.Call
+}
+
+// CreateUser is a helper method to define mock.On call
+//   - _a0 context.Context
+//   - _a1 *models.User
+func (_e *DB_Expecter) CreateUser(_a0 interface{}, _a1 interface{}) *DB_CreateUser_Call {
+	return &DB_CreateUser_Call{Call: _e.mock.On("CreateUser", _a0, _a1)}
+}
+
+func (_c *DB_CreateUser_Call) Run(run func(_a0 context.Context, _a1 *models.User)) *DB_CreateUser_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*models.User))
+	})
+	return _c
+}
+
+func (_c *DB_CreateUser_Call) Return(_a0 models.User, _a1 error) *DB_CreateUser_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *DB_CreateUser_Call) RunAndReturn(run func(context.Context, *models.User) (models.User, error)) *DB_CreateUser_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeleteTransaction provides a mock function with given fields: _a0, _a1, _a2
+func (_m *DB) DeleteTransaction(_a0 context.Context, _a1 int, _a2 int) error {
+	ret := _m.Called(_a0, _a1, _a2)
 
 	if len(ret) == 0 {
 		panic("no return value specified for DeleteTransaction")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, int) error); ok {
-		r0 = rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(context.Context, int, int) error); ok {
+		r0 = rf(_a0, _a1, _a2)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -119,9 +274,39 @@ func (_m *DB) DeleteTransaction(_a0 context.Context, _a1 int) error {
 	return r0
 }
 
-// GetSummary provides a mock function with given fields: parentCtx, from, to
-func (_m *DB) GetSummary(parentCtx context.Context, from time.Time, to time.Time) (models.Summary, error) {
-	ret := _m.Called(parentCtx, from, to)
+// DB_DeleteTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteTransaction'
+type DB_DeleteTransaction_Call struct {
+	*mock.Call
+}
+
+// DeleteTransaction is a helper method to define mock.On call
+//   - _a0 context.Context
+//   - _a1 int
+//   - _a2 int
+func (_e *DB_Expecter) DeleteTransaction(_a0 interface{}, _a1 interface{}, _a2 interface{}) *DB_DeleteTransaction_Call {
+	return &DB_DeleteTransaction_Call{Call: _e.mock.On("DeleteTransaction", _a0, _a1, _a2)}
+}
+
+func (_c *DB_DeleteTransaction_Call) Run(run func(_a0 context.Context, _a1 int, _a2 int)) *DB_DeleteTransaction_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(int), args[2].(int))
+	})
+	return _c
+}
+
+func (_c *DB_DeleteTransaction_Call) Return(_a0 error) *DB_DeleteTransaction_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *DB_DeleteTransaction_Call) RunAndReturn(run func(context.Context, int, int) error) *DB_DeleteTransaction_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetSummary provides a mock function with given fields: _a0, _a1, _a2, _a3
+func (_m *DB) GetSummary(_a0 context.Context, _a1 int, _a2 time.Time, _a3 time.Time) (models.Summary, error) {
+	ret := _m.Called(_a0, _a1, _a2, _a3)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetSummary")
@@ -129,17 +314,17 @@ func (_m *DB) GetSummary(parentCtx context.Context, from time.Time, to time.Time
 
 	var r0 models.Summary
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, time.Time, time.Time) (models.Summary, error)); ok {
-		return rf(parentCtx, from, to)
+	if rf, ok := ret.Get(0).(func(context.Context, int, time.Time, time.Time) (models.Summary, error)); ok {
+		return rf(_a0, _a1, _a2, _a3)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, time.Time, time.Time) models.Summary); ok {
-		r0 = rf(parentCtx, from, to)
+	if rf, ok := ret.Get(0).(func(context.Context, int, time.Time, time.Time) models.Summary); ok {
+		r0 = rf(_a0, _a1, _a2, _a3)
 	} else {
 		r0 = ret.Get(0).(models.Summary)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, time.Time, time.Time) error); ok {
-		r1 = rf(parentCtx, from, to)
+	if rf, ok := ret.Get(1).(func(context.Context, int, time.Time, time.Time) error); ok {
+		r1 = rf(_a0, _a1, _a2, _a3)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -147,9 +332,40 @@ func (_m *DB) GetSummary(parentCtx context.Context, from time.Time, to time.Time
 	return r0, r1
 }
 
-// GetTransactionByID provides a mock function with given fields: _a0, _a1
-func (_m *DB) GetTransactionByID(_a0 context.Context, _a1 int) (models.Transaction, error) {
-	ret := _m.Called(_a0, _a1)
+// DB_GetSummary_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetSummary'
+type DB_GetSummary_Call struct {
+	*mock.Call
+}
+
+// GetSummary is a helper method to define mock.On call
+//   - _a0 context.Context
+//   - _a1 int
+//   - _a2 time.Time
+//   - _a3 time.Time
+func (_e *DB_Expecter) GetSummary(_a0 interface{}, _a1 interface{}, _a2 interface{}, _a3 interface{}) *DB_GetSummary_Call {
+	return &DB_GetSummary_Call{Call: _e.mock.On("GetSummary", _a0, _a1, _a2, _a3)}
+}
+
+func (_c *DB_GetSummary_Call) Run(run func(_a0 context.Context, _a1 int, _a2 time.Time, _a3 time.Time)) *DB_GetSummary_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(int), args[2].(time.Time), args[3].(time.Time))
+	})
+	return _c
+}
+
+func (_c *DB_GetSummary_Call) Return(_a0 models.Summary, _a1 error) *DB_GetSummary_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *DB_GetSummary_Call) RunAndReturn(run func(context.Context, int, time.Time, time.Time) (models.Summary, error)) *DB_GetSummary_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetTransactionByID provides a mock function with given fields: _a0, _a1, _a2
+func (_m *DB) GetTransactionByID(_a0 context.Context, _a1 int, _a2 int) (models.Transaction, error) {
+	ret := _m.Called(_a0, _a1, _a2)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetTransactionByID")
@@ -157,13 +373,193 @@ func (_m *DB) GetTransactionByID(_a0 context.Context, _a1 int) (models.Transacti
 
 	var r0 models.Transaction
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, int) (models.Transaction, error)); ok {
-		return rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(context.Context, int, int) (models.Transaction, error)); ok {
+		return rf(_a0, _a1, _a2)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, int) models.Transaction); ok {
-		r0 = rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(context.Context, int, int) models.Transaction); ok {
+		r0 = rf(_a0, _a1, _a2)
 	} else {
 		r0 = ret.Get(0).(models.Transaction)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, int, int) error); ok {
+		r1 = rf(_a0, _a1, _a2)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// DB_GetTransactionByID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetTransactionByID'
+type DB_GetTransactionByID_Call struct {
+	*mock.Call
+}
+
+// GetTransactionByID is a helper method to define mock.On call
+//   - _a0 context.Context
+//   - _a1 int
+//   - _a2 int
+func (_e *DB_Expecter) GetTransactionByID(_a0 interface{}, _a1 interface{}, _a2 interface{}) *DB_GetTransactionByID_Call {
+	return &DB_GetTransactionByID_Call{Call: _e.mock.On("GetTransactionByID", _a0, _a1, _a2)}
+}
+
+func (_c *DB_GetTransactionByID_Call) Run(run func(_a0 context.Context, _a1 int, _a2 int)) *DB_GetTransactionByID_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(int), args[2].(int))
+	})
+	return _c
+}
+
+func (_c *DB_GetTransactionByID_Call) Return(_a0 models.Transaction, _a1 error) *DB_GetTransactionByID_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *DB_GetTransactionByID_Call) RunAndReturn(run func(context.Context, int, int) (models.Transaction, error)) *DB_GetTransactionByID_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetTransactions provides a mock function with given fields: _a0, _a1, _a2, _a3, _a4, _a5, _a6, _a7
+func (_m *DB) GetTransactions(_a0 context.Context, _a1 int, _a2 *bool, _a3 *int, _a4 *time.Time, _a5 *time.Time, _a6 int, _a7 int) ([]*models.Transaction, error) {
+	ret := _m.Called(_a0, _a1, _a2, _a3, _a4, _a5, _a6, _a7)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetTransactions")
+	}
+
+	var r0 []*models.Transaction
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, int, *bool, *int, *time.Time, *time.Time, int, int) ([]*models.Transaction, error)); ok {
+		return rf(_a0, _a1, _a2, _a3, _a4, _a5, _a6, _a7)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, int, *bool, *int, *time.Time, *time.Time, int, int) []*models.Transaction); ok {
+		r0 = rf(_a0, _a1, _a2, _a3, _a4, _a5, _a6, _a7)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*models.Transaction)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, int, *bool, *int, *time.Time, *time.Time, int, int) error); ok {
+		r1 = rf(_a0, _a1, _a2, _a3, _a4, _a5, _a6, _a7)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// DB_GetTransactions_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetTransactions'
+type DB_GetTransactions_Call struct {
+	*mock.Call
+}
+
+// GetTransactions is a helper method to define mock.On call
+//   - _a0 context.Context
+//   - _a1 int
+//   - _a2 *bool
+//   - _a3 *int
+//   - _a4 *time.Time
+//   - _a5 *time.Time
+//   - _a6 int
+//   - _a7 int
+func (_e *DB_Expecter) GetTransactions(_a0 interface{}, _a1 interface{}, _a2 interface{}, _a3 interface{}, _a4 interface{}, _a5 interface{}, _a6 interface{}, _a7 interface{}) *DB_GetTransactions_Call {
+	return &DB_GetTransactions_Call{Call: _e.mock.On("GetTransactions", _a0, _a1, _a2, _a3, _a4, _a5, _a6, _a7)}
+}
+
+func (_c *DB_GetTransactions_Call) Run(run func(_a0 context.Context, _a1 int, _a2 *bool, _a3 *int, _a4 *time.Time, _a5 *time.Time, _a6 int, _a7 int)) *DB_GetTransactions_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(int), args[2].(*bool), args[3].(*int), args[4].(*time.Time), args[5].(*time.Time), args[6].(int), args[7].(int))
+	})
+	return _c
+}
+
+func (_c *DB_GetTransactions_Call) Return(_a0 []*models.Transaction, _a1 error) *DB_GetTransactions_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *DB_GetTransactions_Call) RunAndReturn(run func(context.Context, int, *bool, *int, *time.Time, *time.Time, int, int) ([]*models.Transaction, error)) *DB_GetTransactions_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetUserByEmail provides a mock function with given fields: _a0, _a1
+func (_m *DB) GetUserByEmail(_a0 context.Context, _a1 string) (models.User, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetUserByEmail")
+	}
+
+	var r0 models.User
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (models.User, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) models.User); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Get(0).(models.User)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// DB_GetUserByEmail_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetUserByEmail'
+type DB_GetUserByEmail_Call struct {
+	*mock.Call
+}
+
+// GetUserByEmail is a helper method to define mock.On call
+//   - _a0 context.Context
+//   - _a1 string
+func (_e *DB_Expecter) GetUserByEmail(_a0 interface{}, _a1 interface{}) *DB_GetUserByEmail_Call {
+	return &DB_GetUserByEmail_Call{Call: _e.mock.On("GetUserByEmail", _a0, _a1)}
+}
+
+func (_c *DB_GetUserByEmail_Call) Run(run func(_a0 context.Context, _a1 string)) *DB_GetUserByEmail_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *DB_GetUserByEmail_Call) Return(_a0 models.User, _a1 error) *DB_GetUserByEmail_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *DB_GetUserByEmail_Call) RunAndReturn(run func(context.Context, string) (models.User, error)) *DB_GetUserByEmail_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetUserByID provides a mock function with given fields: _a0, _a1
+func (_m *DB) GetUserByID(_a0 context.Context, _a1 int) (models.User, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetUserByID")
+	}
+
+	var r0 models.User
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, int) (models.User, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, int) models.User); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Get(0).(models.User)
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, int) error); ok {
@@ -175,34 +571,33 @@ func (_m *DB) GetTransactionByID(_a0 context.Context, _a1 int) (models.Transacti
 	return r0, r1
 }
 
-// GetTransactions provides a mock function with given fields: parentCtx, txType, category_id, from, to, limit, offset
-func (_m *DB) GetTransactions(parentCtx context.Context, txType *bool, category_id *int, from *time.Time, to *time.Time, limit int, offset int) ([]*models.Transaction, error) {
-	ret := _m.Called(parentCtx, txType, category_id, from, to, limit, offset)
+// DB_GetUserByID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetUserByID'
+type DB_GetUserByID_Call struct {
+	*mock.Call
+}
 
-	if len(ret) == 0 {
-		panic("no return value specified for GetTransactions")
-	}
+// GetUserByID is a helper method to define mock.On call
+//   - _a0 context.Context
+//   - _a1 int
+func (_e *DB_Expecter) GetUserByID(_a0 interface{}, _a1 interface{}) *DB_GetUserByID_Call {
+	return &DB_GetUserByID_Call{Call: _e.mock.On("GetUserByID", _a0, _a1)}
+}
 
-	var r0 []*models.Transaction
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *bool, *int, *time.Time, *time.Time, int, int) ([]*models.Transaction, error)); ok {
-		return rf(parentCtx, txType, category_id, from, to, limit, offset)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, *bool, *int, *time.Time, *time.Time, int, int) []*models.Transaction); ok {
-		r0 = rf(parentCtx, txType, category_id, from, to, limit, offset)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*models.Transaction)
-		}
-	}
+func (_c *DB_GetUserByID_Call) Run(run func(_a0 context.Context, _a1 int)) *DB_GetUserByID_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(int))
+	})
+	return _c
+}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *bool, *int, *time.Time, *time.Time, int, int) error); ok {
-		r1 = rf(parentCtx, txType, category_id, from, to, limit, offset)
-	} else {
-		r1 = ret.Error(1)
-	}
+func (_c *DB_GetUserByID_Call) Return(_a0 models.User, _a1 error) *DB_GetUserByID_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
 
-	return r0, r1
+func (_c *DB_GetUserByID_Call) RunAndReturn(run func(context.Context, int) (models.User, error)) *DB_GetUserByID_Call {
+	_c.Call.Return(run)
+	return _c
 }
 
 // NewDB creates a new instance of DB. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.

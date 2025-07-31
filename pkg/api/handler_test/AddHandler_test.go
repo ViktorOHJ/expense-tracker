@@ -2,6 +2,7 @@ package handler_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -10,6 +11,7 @@ import (
 
 	models "github.com/ViktorOHJ/expense-tracker/pkg"
 	"github.com/ViktorOHJ/expense-tracker/pkg/api"
+	"github.com/ViktorOHJ/expense-tracker/pkg/auth"
 	"github.com/ViktorOHJ/expense-tracker/pkg/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -17,7 +19,9 @@ import (
 
 func TestAddHandler_Success(t *testing.T) {
 	mockDB := new(mocks.DB)
-	s := api.NewServer(mockDB)
+	jwtService := auth.NewJWTService("test-secret")
+	passwordService := auth.NewPasswordService()
+	s := api.NewServer(mockDB, jwtService, passwordService)
 
 	input := models.Transaction{
 		IsIncome:   false,
@@ -30,7 +34,8 @@ func TestAddHandler_Success(t *testing.T) {
 		ID:         1,
 		IsIncome:   false,
 		Amount:     100,
-		CategoryID: 1,
+		CategoryID: 2,
+		UserID:     1,
 		Note:       "Lunch",
 		CreatedAt:  time.Date(2025, 7, 20, 0, 0, 0, 0, time.UTC),
 	}
@@ -38,13 +43,20 @@ func TestAddHandler_Success(t *testing.T) {
 	body, err := json.Marshal(input)
 	assert.NoError(t, err)
 
-	mockDB.On("CheckCategory", mock.Anything, input.CategoryID).Return(true, nil)
-	mockDB.On("AddTransaction", mock.Anything, mock.MatchedBy(func(tx *models.Transaction) bool {
+	mockDB.On("CheckCategory", mock.Anything, 1, input.CategoryID).Return(true, nil)
+	mockDB.On("AddTransaction", mock.Anything, 1, mock.MatchedBy(func(tx *models.Transaction) bool {
 		return tx.Amount == input.Amount && tx.Note == input.Note
 	})).Return(returned, nil)
 
-	req := httptest.NewRequest(http.MethodPost, "/transactions?", bytes.NewReader(body))
+	req := httptest.NewRequest(http.MethodPost, "/transactions", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
+
+	claims := &auth.Claims{
+		UserID: 1,
+		Email:  "test@example.com",
+	}
+	ctx := context.WithValue(req.Context(), api.UserContextKey, claims)
+	req = req.WithContext(ctx)
 
 	rr := httptest.NewRecorder()
 
@@ -53,7 +65,6 @@ func TestAddHandler_Success(t *testing.T) {
 	assert.Equal(t, http.StatusCreated, rr.Code)
 
 	var actualResp models.SuccessResponse
-
 	err = json.NewDecoder(rr.Body).Decode(&actualResp)
 	assert.NoError(t, err)
 
@@ -65,21 +76,61 @@ func TestAddHandler_Success(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, returned, actualTransaction)
+	assert.Equal(t, "transaction added successfully", actualResp.Message)
 
-	assert.Equal(t, "transactions added successfuly", actualResp.Message)
+	mockDB.AssertExpectations(t)
+}
+
+func TestAddHandler_Unauthorized(t *testing.T) {
+	mockDB := new(mocks.DB)
+	jwtService := auth.NewJWTService("test-secret")
+	passwordService := auth.NewPasswordService()
+	s := api.NewServer(mockDB, jwtService, passwordService)
+
+	input := models.Transaction{
+		IsIncome:   false,
+		Amount:     100,
+		CategoryID: 2,
+		Note:       "Lunch",
+	}
+
+	body, err := json.Marshal(input)
+	assert.NoError(t, err)
+
+	req := httptest.NewRequest(http.MethodPost, "/transactions", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+
+	rr := httptest.NewRecorder()
+
+	s.AddHandler(rr, req)
+
+	assert.Equal(t, http.StatusUnauthorized, rr.Code)
+
+	var actualResp models.ErrorResponse
+	err = json.NewDecoder(rr.Body).Decode(&actualResp)
+	assert.NoError(t, err)
+
+	assert.Equal(t, "unauthorized", actualResp.Message)
 
 	mockDB.AssertExpectations(t)
 }
 
 func TestAddHandler_InvalidJSON(t *testing.T) {
 	mockDB := new(mocks.DB)
-	s := api.NewServer(mockDB)
+	jwtService := auth.NewJWTService("test-secret")
+	passwordService := auth.NewPasswordService()
+	s := api.NewServer(mockDB, jwtService, passwordService)
 
 	invalidJSON := `{"IsIncome": true, "Amount": 100, "CategoryID": 2, "Note": "Lunch"`
 
 	req := httptest.NewRequest(http.MethodPost, "/transactions?", bytes.NewReader([]byte(invalidJSON)))
 	req.Header.Set("Content-Type", "application/json")
-
+	claims := &auth.Claims{
+		UserID: 1,
+		Email:  "test@example.com",
+	}
+	ctx := context.WithValue(req.Context(), api.UserContextKey, claims)
+	req = req.WithContext(ctx)
 	rr := httptest.NewRecorder()
 
 	s.AddHandler(rr, req)
@@ -97,7 +148,9 @@ func TestAddHandler_InvalidJSON(t *testing.T) {
 
 func TestAddHandler_CategoryNotFound(t *testing.T) {
 	mockDB := new(mocks.DB)
-	s := api.NewServer(mockDB)
+	jwtService := auth.NewJWTService("test-secret")
+	passwordService := auth.NewPasswordService()
+	s := api.NewServer(mockDB, jwtService, passwordService)
 
 	input := models.Transaction{
 		IsIncome:   false,
@@ -109,10 +162,14 @@ func TestAddHandler_CategoryNotFound(t *testing.T) {
 	body, err := json.Marshal(input)
 	assert.NoError(t, err)
 
-	mockDB.On("CheckCategory", mock.Anything, input.CategoryID).Return(false, nil)
+	mockDB.On("CheckCategory", mock.Anything, 1, input.CategoryID).Return(false, nil)
 
-	req := httptest.NewRequest(http.MethodPost, "/transactions?", bytes.NewReader(body))
+	req := httptest.NewRequest(http.MethodPost, "/transactions", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
+
+	claims := &auth.Claims{UserID: 1, Email: "test@example.com"}
+	ctx := context.WithValue(req.Context(), api.UserContextKey, claims)
+	req = req.WithContext(ctx)
 
 	rr := httptest.NewRecorder()
 
@@ -124,14 +181,16 @@ func TestAddHandler_CategoryNotFound(t *testing.T) {
 	err = json.NewDecoder(rr.Body).Decode(&actualResp)
 	assert.NoError(t, err)
 
-	assert.Equal(t, "category does not exist", actualResp.Message)
+	assert.Equal(t, "category does not exist or access denied", actualResp.Message)
 
 	mockDB.AssertExpectations(t)
 }
 
 func TestAddHandler_AmountZeroOrNegative(t *testing.T) {
 	mockDB := new(mocks.DB)
-	s := api.NewServer(mockDB)
+	jwtService := auth.NewJWTService("test-secret")
+	passwordService := auth.NewPasswordService()
+	s := api.NewServer(mockDB, jwtService, passwordService)
 
 	input := models.Transaction{
 		IsIncome:   false,
@@ -145,6 +204,9 @@ func TestAddHandler_AmountZeroOrNegative(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodPost, "/transactions?", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
+	claims := &auth.Claims{UserID: 1, Email: "test@example.com"}
+	ctx := context.WithValue(req.Context(), api.UserContextKey, claims)
+	req = req.WithContext(ctx)
 
 	rr := httptest.NewRecorder()
 
@@ -162,7 +224,9 @@ func TestAddHandler_AmountZeroOrNegative(t *testing.T) {
 }
 func TestAddHandler_DBError(t *testing.T) {
 	mockDB := new(mocks.DB)
-	s := api.NewServer(mockDB)
+	jwtService := auth.NewJWTService("test-secret")
+	passwordService := auth.NewPasswordService()
+	s := api.NewServer(mockDB, jwtService, passwordService)
 
 	input := models.Transaction{
 		IsIncome:   false,
@@ -174,11 +238,15 @@ func TestAddHandler_DBError(t *testing.T) {
 	body, err := json.Marshal(input)
 	assert.NoError(t, err)
 
-	mockDB.On("CheckCategory", mock.Anything, input.CategoryID).Return(true, nil)
-	mockDB.On("AddTransaction", mock.Anything, mock.Anything).Return(models.Transaction{}, assert.AnError)
+	mockDB.On("CheckCategory", mock.Anything, 1, input.CategoryID).Return(true, nil)
+	mockDB.On("AddTransaction", mock.Anything, 1, mock.Anything).Return(models.Transaction{}, assert.AnError)
 
 	req := httptest.NewRequest(http.MethodPost, "/transactions?", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
+
+	claims := &auth.Claims{UserID: 1, Email: "test@example.com"}
+	ctx := context.WithValue(req.Context(), api.UserContextKey, claims)
+	req = req.WithContext(ctx)
 
 	rr := httptest.NewRecorder()
 
@@ -190,7 +258,7 @@ func TestAddHandler_DBError(t *testing.T) {
 	err = json.NewDecoder(rr.Body).Decode(&actualResp)
 	assert.NoError(t, err)
 
-	assert.Equal(t, "error adding transactions", actualResp.Message)
+	assert.Equal(t, "error adding transaction", actualResp.Message)
 
 	mockDB.AssertExpectations(t)
 }

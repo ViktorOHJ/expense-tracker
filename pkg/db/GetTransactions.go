@@ -9,11 +9,12 @@ import (
 	models "github.com/ViktorOHJ/expense-tracker/pkg"
 )
 
-func (db *PostgresDB) GetTransactions(parentCtx context.Context, txType *bool, category_id *int, from, to *time.Time, limit, offset int) ([]*models.Transaction, error) {
+func (db *PostgresDB) GetTransactions(parentCtx context.Context, userID int, txType *bool, category_id *int, from, to *time.Time, limit, offset int) ([]*models.Transaction, error) {
 
-	query := `SELECT * FROM transactions WHERE 1=1`
-	args := []interface{}{}
-	i := 1
+	query := `SELECT * FROM transactions WHERE user_id = $1`
+	args := []interface{}{userID}
+	i := 2 // Start with 2 because $1 is already used for userID
+
 	if txType != nil {
 		query += fmt.Sprintf(` AND is_income = $%d`, i)
 		args = append(args, *txType)
@@ -50,7 +51,8 @@ func (db *PostgresDB) GetTransactions(parentCtx context.Context, txType *bool, c
 	var transactions []*models.Transaction
 	for rows.Next() {
 		var transaction models.Transaction
-		err := rows.Scan(&transaction.ID, &transaction.IsIncome, &transaction.Amount, &transaction.CategoryID, &transaction.Note, &transaction.CreatedAt)
+		err := rows.Scan(&transaction.ID, &transaction.IsIncome, &transaction.Amount,
+			&transaction.CategoryID, &transaction.UserID, &transaction.Note, &transaction.CreatedAt)
 		if err != nil {
 			log.Printf("failed to scan transaction: %v", err)
 			return []*models.Transaction{}, err
