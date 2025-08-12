@@ -20,7 +20,6 @@ func main() {
 
 	ctx := context.Background()
 
-	// Инициализация базы данных
 	pool, err := db.InitDB(ctx, os.Getenv("DB_URL"))
 	if err != nil {
 		log.Fatalf("Error initializing database: %v", err)
@@ -29,7 +28,6 @@ func main() {
 
 	database := db.NewPostgresDB(pool)
 
-	// Инициализация сервисов авторизации
 	jwtService := auth.NewJWTService(os.Getenv("JWT_SECRET"))
 	passwordService := auth.NewPasswordService()
 

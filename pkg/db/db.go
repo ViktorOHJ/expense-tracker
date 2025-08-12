@@ -37,7 +37,6 @@ func InitDB(parentCtx context.Context, dbURL string) (*pgxpool.Pool, error) {
 	defer cancel()
 
 	schema := `
--- Таблица пользователей
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
@@ -45,7 +44,6 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Таблица категорий с привязкой к пользователю
 CREATE TABLE IF NOT EXISTS categories (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -55,7 +53,6 @@ CREATE TABLE IF NOT EXISTS categories (
     UNIQUE(name, user_id) -- Уникальность имени категории в рамках пользователя
 );
 
--- Таблица транзакций с привязкой к пользователю
 CREATE TABLE IF NOT EXISTS transactions (
     id SERIAL PRIMARY KEY,
     is_income BOOLEAN NOT NULL,
@@ -66,7 +63,6 @@ CREATE TABLE IF NOT EXISTS transactions (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Индексы для производительности
 CREATE INDEX IF NOT EXISTS idx_transactions_user_id ON transactions(user_id);
 CREATE INDEX IF NOT EXISTS idx_transactions_created_at ON transactions(created_at);
 CREATE INDEX IF NOT EXISTS idx_transactions_category_id ON transactions(category_id);
@@ -74,7 +70,6 @@ CREATE INDEX IF NOT EXISTS idx_transactions_is_income ON transactions(is_income)
 CREATE INDEX IF NOT EXISTS idx_categories_user_id ON categories(user_id);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 
--- Составные индексы для частых запросов
 CREATE INDEX IF NOT EXISTS idx_transactions_user_created ON transactions(user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_transactions_user_income ON transactions(user_id, is_income);
 `

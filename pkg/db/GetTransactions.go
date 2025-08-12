@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	models "github.com/ViktorOHJ/expense-tracker/pkg"
@@ -16,22 +17,22 @@ func (db *PostgresDB) GetTransactions(parentCtx context.Context, userID int, txT
 	i := 2 // Start with 2 because $1 is already used for userID
 
 	if txType != nil {
-		query += fmt.Sprintf(` AND is_income = $%d`, i)
+		query += ` AND is_income = $` + strconv.Itoa(i)
 		args = append(args, *txType)
 		i++
 	}
 	if category_id != nil {
-		query += fmt.Sprintf(` AND category_id = $%d`, i)
+		query += ` AND category_id = $` + strconv.Itoa(i)
 		args = append(args, *category_id)
 		i++
 	}
 	if from != nil {
-		query += fmt.Sprintf(` AND created_at >= $%d`, i)
+		query += ` AND created_at >= $` + strconv.Itoa(i)
 		args = append(args, *from)
 		i++
 	}
 	if to != nil {
-		query += fmt.Sprintf(` AND created_at <= $%d`, i)
+		query += ` AND created_at <= $` + strconv.Itoa(i)
 		args = append(args, *to)
 		i++
 	}

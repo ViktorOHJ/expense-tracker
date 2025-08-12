@@ -35,6 +35,11 @@ func (s *Server) AddHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if transaction.CategoryID <= 0 {
+		JsonError(w, http.StatusBadRequest, "category_id is required")
+		return
+	}
+
 	ctx := r.Context()
 
 	exists, err := s.db.CheckCategory(ctx, user.UserID, transaction.CategoryID)

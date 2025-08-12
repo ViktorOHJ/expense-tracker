@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_pass
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.24'
+
+    - name: Download dependencies
+      run: go mod download
+
+    - name: Run tests
+      env:
+        DB_URL: postgres://test_user:test_pass@localhost:5432/test_db?sslmode=disable
+        JWT_SECRET: test-jwt-secret
+      run: go test -v ./...
+
+  build:
+    name: Build Docker
+    runs-on: ubuntu-latest
+    needs: [test]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Build Docker image
+      run: docker build -t expense-tracker:latest .
+
+    - name: Test Docker image runs
+      run: |
+        docker run --rm -d --name test-app \
+          -e DB_URL=fake \
+          -e JWT_SECRET=fake \
+          expense-tracker:latest
+        sleep 3
+        # Проверяем что контейнер не упал
+        if docker ps | grep test-app; then
+          echo "✅ Container started successfully"
+          docker stop test-app
+        else
+          echo "❌ Container failed to start"
+          docker logs test-app
+          exit 1
