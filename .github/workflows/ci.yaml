@@ -58,17 +58,13 @@ jobs:
 
     - name: Test Docker image runs
       run: |
-        docker run --rm -d --name test-app \
-          -e DB_URL=fake \
-          -e JWT_SECRET=fake \
-          expense-tracker:latest
+        docker run --rm -d --name test-app -e DB_URL=fake -e JWT_SECRET=fake expense-tracker:latest
         sleep 3
-        # Проверяем что контейнер не упал
         if docker ps | grep test-app; then
           echo "✅ Container started successfully"
           docker stop test-app
         else
           echo "❌ Container failed to start"
-          docker logs test-app
+          docker logs test-app || true
           exit 1
         fi
