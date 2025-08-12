@@ -71,3 +71,4 @@ jobs:
           echo "❌ Container failed to start"
           docker logs test-app
           exit 1
+        fi
