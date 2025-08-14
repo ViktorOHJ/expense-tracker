@@ -172,11 +172,9 @@ Authorization: Bearer <your-jwt-token>
 ## 🧪 Тестирование
 
 ```bash
-# Запуск тестов
+# Запуск  тестов
 go test -v ./...
-
-## 🏗️ Архитектура проекта
-
+```
 expense-tracker/
 ├── cmd/app/                 # Точка входа приложения
 ├── pkg/
@@ -192,6 +190,26 @@ expense-tracker/
 ├── compose.yaml
 ├── go.mod
 └── go.sum
+
+## 🏗️ Архитектура проекта
+
+```
+expense-tracker/
+├── cmd/app/                 # Точка входа приложения
+├── pkg/
+│   ├── api/                 # HTTP handlers и middleware
+│   │   └── handler_test/    # Тесты для handlers
+│   ├── auth/                # JWT и работа с паролями
+│   ├── db/                  # Слой работы с БД
+│   ├── mocks/               # Моки для тестирования
+│   ├── models.go            # Структуры данных
+│   └── models_auth.go       # Структуры для аутентификации
+├── .github/workflows/       # CI/CD конфигурация
+├── Dockerfile
+├── compose.yaml
+├── go.mod
+└── go.sum
+```
 
 ## 🔧 Конфигурация
 
